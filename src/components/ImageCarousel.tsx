@@ -1,26 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 
 const images = [
-  '/crackedimg/El.jpeg',
-  '/crackedimg/starship.png',
-  '/crackedimg/raptor engine.jpeg',
-  '/crackedimg/SpaceX Raptor 3.jpeg',
-  '/crackedimg/SpaceX Maxar 2 Mission.jpeg',
-  '/crackedimg/SpaceX Starship Flight 5.jpeg',
-  '/crackedimg/33bcc865-6607-4ccf-a7ef-5be4444366e9.jpeg',
-  '/crackedimg/5bf96ca7-fd3f-41bc-ab74-6a3584453e90.jpeg',
-  '/crackedimg/90b9d343-729e-4828-aa1e-dfaaa4df7131.jpeg',
-  '/crackedimg/9ea1bdd3-e812-4e49-b940-50a805b68eaf.jpeg',
-  '/crackedimg/Bookmarks X.jpeg',
-  '/crackedimg/Bookmarks X (1).jpeg',
-  '/crackedimg/Gwynne Shotwell on X.jpeg',
-  '/crackedimg/Image from Twitter.jpeg',
-  '/crackedimg/Post Image from X (1).jpeg',
-  '/crackedimg/Trending Now X.jpeg',
-  '/crackedimg/Screenshot 2024-11-22 at 3.51.17 PM.png',
-  '/crackedimg/Screenshot 2024-11-22 at 3.51.36 PM.png',
-  '/crackedimg/Screenshot 2024-11-22 at 3.51.55 PM.png',
-  '/crackedimg/Screenshot 2024-11-22 at 3.58.30 PM.png'
+  '/El.jpeg',
+  '/starship.png',
+  '/raptor-engine.jpeg',
+  '/SpaceX-Raptor-3.jpeg',
+  '/SpaceX-Maxar-2-Mission.jpeg',
+  '/SpaceX-Starship-Flight-5.jpeg',
+  '/33bcc865-6607-4ccf-a7ef-5be4444366e9.jpeg',
+  '/5bf96ca7-fd3f-41bc-ab74-6a3584453e90.jpeg',
+  '/90b9d343-729e-4828-aa1e-dfaaa4df7131.jpeg',
+  '/9ea1bdd3-e812-4e49-b940-50a805b68eaf.jpeg',
+  '/Bookmarks-X.jpeg',
+  '/Bookmarks-X-1.jpeg',
+  '/Gwynne-Shotwell-on-X.jpeg',
+  '/Image-from-Twitter.jpeg',
+  '/Post-Image-from-X-1.jpeg',
+  '/Trending-Now-X.jpeg',
+  '/Screenshot-2024-11-22-at-3-51-17-PM.png',
+  '/Screenshot-2024-11-22-at-3-51-36-PM.png',
+  '/Screenshot-2024-11-22-at-3-51-55-PM.png',
+  '/Screenshot-2024-11-22-at-3-58-30-PM.png'
 ];
 
 export function ImageCarousel() {
@@ -28,7 +28,6 @@ export function ImageCarousel() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadedImages, setLoadedImages] = useState(0);
 
-  // Preload images
   useEffect(() => {
     const imagePromises = images.map(src => {
       return new Promise((resolve) => {
@@ -38,7 +37,7 @@ export function ImageCarousel() {
           setLoadedImages(prev => prev + 1);
           resolve(null);
         };
-        img.onerror = () => resolve(null); // Handle failed loads gracefully
+        img.onerror = () => resolve(null);
       });
     });
 
