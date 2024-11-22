@@ -1,26 +1,40 @@
 import { useEffect, useRef } from 'react';
 
+// Import all images
+import el from '/crackedimg/El.jpeg';
+import starship from '/crackedimg/starship.png';
+import raptorEngine from '/crackedimg/raptor engine.jpeg';
+import spaceXRaptor3 from '/crackedimg/SpaceX Raptor 3.jpeg';
+import maxar2Mission from '/crackedimg/SpaceX Maxar 2 Mission.jpeg';
+import starshipFlight5 from '/crackedimg/SpaceX Starship Flight 5.jpeg';
+import img33bcc from '/crackedimg/33bcc865-6607-4ccf-a7ef-5be4444366e9.jpeg';
+import img5bf96 from '/crackedimg/5bf96ca7-fd3f-41bc-ab74-6a3584453e90.jpeg';
+import img90b9d from '/crackedimg/90b9d343-729e-4828-aa1e-dfaaa4df7131.jpeg';
+import img9ea1b from '/crackedimg/9ea1bdd3-e812-4e49-b940-50a805b68eaf.jpeg';
+import bookmarksX from '/crackedimg/Bookmarks X.jpeg';
+import bookmarksX1 from '/crackedimg/Bookmarks X (1).jpeg';
+import gwynneShotwell from '/crackedimg/Gwynne Shotwell on X.jpeg';
+import imageFromTwitter from '/crackedimg/Image from Twitter.jpeg';
+import postImageX1 from '/crackedimg/Post Image from X (1).jpeg';
+import trendingNowX from '/crackedimg/Trending Now X.jpeg';
+
 const images = [
-  '/crackedimg/El.jpeg',
-  '/crackedimg/starship.png',
-  '/crackedimg/raptor engine.jpeg',
-  '/crackedimg/SpaceX Raptor 3.jpeg',
-  '/crackedimg/SpaceX Maxar 2 Mission.jpeg',
-  '/crackedimg/SpaceX Starship Flight 5.jpeg',
-  '/crackedimg/33bcc865-6607-4ccf-a7ef-5be4444366e9.jpeg',
-  '/crackedimg/5bf96ca7-fd3f-41bc-ab74-6a3584453e90.jpeg',
-  '/crackedimg/90b9d343-729e-4828-aa1e-dfaaa4df7131.jpeg',
-  '/crackedimg/9ea1bdd3-e812-4e49-b940-50a805b68eaf.jpeg',
-  '/crackedimg/Bookmarks X.jpeg',
-  '/crackedimg/Bookmarks X (1).jpeg',
-  '/crackedimg/Gwynne Shotwell on X.jpeg',
-  '/crackedimg/Image from Twitter.jpeg',
-  '/crackedimg/Post Image from X (1).jpeg',
-  '/crackedimg/Trending Now X.jpeg',
-  '/crackedimg/Screenshot 2024-11-22 at 3.51.17 PM.png',
-  '/crackedimg/Screenshot 2024-11-22 at 3.51.36 PM.png',
-  '/crackedimg/Screenshot 2024-11-22 at 3.51.55 PM.png',
-  '/crackedimg/Screenshot 2024-11-22 at 3.58.30 PM.png'
+  el,
+  starship,
+  raptorEngine,
+  spaceXRaptor3,
+  maxar2Mission,
+  starshipFlight5,
+  img33bcc,
+  img5bf96,
+  img90b9d,
+  img9ea1b,
+  bookmarksX,
+  bookmarksX1,
+  gwynneShotwell,
+  imageFromTwitter,
+  postImageX1,
+  trendingNowX
 ];
 
 export function ImageCarousel() {

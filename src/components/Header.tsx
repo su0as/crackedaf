@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAdmin } from '../context/AdminContext';
+import crackedafLogo from '/crackedaf.png';
 
 interface HeaderProps {
   siliconValleyOnly: boolean;
@@ -14,7 +15,7 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
     <header className="bg-black border-b border-zinc-800">
       <nav className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link to="/" className="group relative">
-          <img src="/crackedaf.png" alt="CrackedAF" className="h-8" />
+          <img src={crackedafLogo} alt="CrackedAF" className="h-8" />
           <span className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-2 rounded-md text-sm font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border border-zinc-800">
             To be absolutely insane (really good) in a certain activity.
           </span>
