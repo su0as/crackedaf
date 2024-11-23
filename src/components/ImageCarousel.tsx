@@ -45,10 +45,9 @@ export function ImageCarousel() {
     if (!container) return;
 
     const scroll = () => {
-      const scrollAmount = -1; // Negative value for right-to-left movement
+      const scrollAmount = -1;
       container.scrollLeft += scrollAmount;
 
-      // Reset scroll position when reaching the start
       if (container.scrollLeft <= 0) {
         container.scrollLeft = container.scrollWidth / 2;
       }
@@ -63,16 +62,15 @@ export function ImageCarousel() {
       <div className="relative w-screen overflow-hidden">
         <div
           ref={containerRef}
-          className="flex space-x-4 py-4 overflow-x-hidden"
-          style={{ width: '200%' }} // Make the container twice as wide
+          className="flex space-x-4 py-2 overflow-x-hidden"
+          style={{ width: '200%' }}
         >
-          {/* Duplicate the images to create a seamless loop */}
           {[...images, ...images, ...images].map((src, index) => (
             <img
               key={index}
               src={src}
               alt={`Carousel image ${index + 1}`}
-              className="h-32 w-auto object-cover rounded-lg flex-none"
+              className="h-16 w-auto object-cover rounded-lg flex-none md:h-32"
               draggable={false}
             />
           ))}
