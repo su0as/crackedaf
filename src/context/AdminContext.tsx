@@ -10,33 +10,54 @@ interface AdminContextType {
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
-// Get admin credentials from environment variables
-const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME;
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
+// Default admin credentials for development
+const DEFAULT_ADMIN = {
+  username: 'admin',
+  password: 'admin'
+};
 
-// Initialize hashed password
-let HASHED_ADMIN_PASSWORD: string;
+// Get admin credentials from environment variables or use defaults
+const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME || DEFAULT_ADMIN.username;
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || DEFAULT_ADMIN.password;
 
 export function AdminProvider({ children }: { children: ReactNode }) {
-  const [isAdmin, setIsAdmin] = useState(() => {
-    const token = storage.get('adminToken');
-    return token ? verifyAdminToken(token) : false;
-  });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [hashedPassword, setHashedPassword] = useState<string | null>(null);
 
   // Initialize hashed password
   useEffect(() => {
     const initializeHash = async () => {
-      HASHED_ADMIN_PASSWORD = await hashPassword(ADMIN_PASSWORD);
+      try {
+        const hashed = await hashPassword(ADMIN_PASSWORD);
+        setHashedPassword(hashed);
+        
+        // Check for existing valid token
+        const token = storage.get('adminToken');
+        if (token) {
+          setIsAdmin(verifyAdminToken(token));
+        }
+      } catch (error) {
+        console.error('Failed to initialize admin hash:', error);
+      }
     };
+    
     initializeHash();
   }, []);
 
-  const login = async (username: string, password: string) => {
-    if (username === ADMIN_USERNAME && await verifyPassword(password, HASHED_ADMIN_PASSWORD)) {
-      const token = generateAdminToken();
-      storage.set('adminToken', token);
-      setIsAdmin(true);
-      return true;
+  const login = async (username: string, password: string): Promise<boolean> => {
+    try {
+      if (!hashedPassword) {
+        throw new Error('Admin system not initialized');
+      }
+
+      if (username === ADMIN_USERNAME && await verifyPassword(password, hashedPassword)) {
+        const token = generateAdminToken();
+        storage.set('adminToken', token);
+        setIsAdmin(true);
+        return true;
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
     }
     return false;
   };
@@ -88,7 +109,7 @@ function verifyAdminToken(token: string): boolean {
 
     // Validate token age
     if (tokenAge > maxAge) {
-      storage.remove('adminToken'); // Clear expired token
+      storage.remove('adminToken');
       return false;
     }
 
