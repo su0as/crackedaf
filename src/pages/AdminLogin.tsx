@@ -6,17 +6,26 @@ export function AdminLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAdmin();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
-    if (login(username, password)) {
-      navigate('/admin');
-    } else {
-      setError('Invalid credentials');
+    try {
+      const success = await login(username, password);
+      if (success) {
+        navigate('/admin');
+      } else {
+        setError('Invalid credentials');
+      }
+    } catch (err) {
+      setError('Authentication failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -43,6 +52,7 @@ export function AdminLogin() {
               onChange={(e) => setUsername(e.target.value)}
               className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white font-silkscreen"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -57,14 +67,16 @@ export function AdminLogin() {
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white font-silkscreen"
               required
+              disabled={isLoading}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-white text-black py-2 px-4 rounded-md hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-zinc-900 transition-colors font-silkscreen"
+            disabled={isLoading}
+            className="w-full bg-white text-black py-2 px-4 rounded-md hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-zinc-900 transition-colors font-silkscreen disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            LOGIN
+            {isLoading ? 'LOGGING IN...' : 'LOGIN'}
           </button>
         </form>
       </div>

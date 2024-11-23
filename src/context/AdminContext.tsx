@@ -1,10 +1,10 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { storage } from '../utils/storage';
 import { hashPassword, verifyPassword } from '../utils/crypto';
 
 interface AdminContextType {
   isAdmin: boolean;
-  login: (username: string, password: string) => boolean;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -14,8 +14,8 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME;
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
-// Hash the admin password for secure storage
-const HASHED_ADMIN_PASSWORD = hashPassword(ADMIN_PASSWORD);
+// Initialize hashed password
+let HASHED_ADMIN_PASSWORD: string;
 
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -23,8 +23,16 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     return token ? verifyAdminToken(token) : false;
   });
 
-  const login = (username: string, password: string) => {
-    if (username === ADMIN_USERNAME && verifyPassword(password, HASHED_ADMIN_PASSWORD)) {
+  // Initialize hashed password
+  useEffect(() => {
+    const initializeHash = async () => {
+      HASHED_ADMIN_PASSWORD = await hashPassword(ADMIN_PASSWORD);
+    };
+    initializeHash();
+  }, []);
+
+  const login = async (username: string, password: string) => {
+    if (username === ADMIN_USERNAME && await verifyPassword(password, HASHED_ADMIN_PASSWORD)) {
       const token = generateAdminToken();
       storage.set('adminToken', token);
       setIsAdmin(true);
@@ -55,19 +63,36 @@ export function useAdmin() {
 
 // Helper functions for token management
 function generateAdminToken(): string {
-  return btoa(JSON.stringify({
+  const tokenData = {
     username: ADMIN_USERNAME,
     timestamp: Date.now(),
-    // Add additional security measures as needed
-  }));
+    nonce: Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join(''),
+    version: '1.0'
+  };
+  
+  return btoa(JSON.stringify(tokenData));
 }
 
 function verifyAdminToken(token: string): boolean {
   try {
     const decoded = JSON.parse(atob(token));
     const tokenAge = Date.now() - decoded.timestamp;
-    // Token expires after 24 hours
-    return decoded.username === ADMIN_USERNAME && tokenAge < 24 * 60 * 60 * 1000;
+    const maxAge = 12 * 60 * 60 * 1000; // 12 hours
+    
+    // Validate token format and version
+    if (!decoded.version || decoded.version !== '1.0') {
+      return false;
+    }
+
+    // Validate token age
+    if (tokenAge > maxAge) {
+      storage.remove('adminToken'); // Clear expired token
+      return false;
+    }
+
+    return decoded.username === ADMIN_USERNAME;
   } catch {
     return false;
   }
