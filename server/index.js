@@ -1,54 +1,100 @@
 import express from 'express';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import helmet from 'helmet';
+import { WebSocketServer } from 'ws';
+import http from 'http';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import rateLimit from 'express-rate-limit';
-import { errorHandler } from './middleware/errorHandler.js';
-import authRoutes from './routes/auth.js';
-import storyRoutes from './routes/stories.js';
-import userRoutes from './routes/users.js';
-import { logger } from './utils/logger.js';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
 
-// Security middleware
-app.use(helmet());
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));
-app.use(cookieParser());
+app.use(cors());
 app.use(express.json());
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
-
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/stories', storyRoutes);
-app.use('/api/users', userRoutes);
-
-// Error handling
-app.use(errorHandler);
-
-// Database connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
-    logger.info('Connected to MongoDB');
-    app.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
-    });
-  })
-  .catch((error) => {
-    logger.error('MongoDB connection error:', error);
-    process.exit(1);
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  const distPath = join(__dirname, '..', 'dist');
+  app.use(express.static(distPath));
+  
+  // Handle SPA routing
+  app.get('*', (req, res) => {
+    res.sendFile(join(distPath, 'index.html'));
   });
+}
+
+// In-memory store
+let stories = [];
+let pendingStories = [];
+
+// Broadcast to all clients
+function broadcast(data) {
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) {
+      client.send(JSON.stringify(data));
+    }
+  });
+}
+
+// WebSocket connection handling
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+  
+  // Send initial data to new client
+  ws.send(JSON.stringify({
+    type: 'INIT',
+    data: { stories, pendingStories }
+  }));
+
+  ws.on('message', (message) => {
+    const data = JSON.parse(message);
+    console.log('Received:', data.type);
+
+    switch (data.type) {
+      case 'ADD_STORY':
+        pendingStories = [data.story, ...pendingStories];
+        break;
+      case 'APPROVE_STORY':
+        const story = pendingStories.find(s => s.id === data.id);
+        if (story) {
+          const approvedStory = { ...story, approved: true, isSiliconValley: data.isSiliconValley };
+          stories = [approvedStory, ...stories];
+          pendingStories = pendingStories.filter(s => s.id !== data.id);
+        }
+        break;
+      case 'REJECT_STORY':
+        pendingStories = pendingStories.filter(s => s.id !== data.id);
+        break;
+      case 'REMOVE_STORY':
+        stories = stories.filter(s => s.id !== data.id);
+        pendingStories = pendingStories.filter(s => s.id !== data.id);
+        break;
+      case 'UPVOTE_STORY':
+        stories = stories.map(story => {
+          if (story.id === data.id) {
+            return { ...story, score: story.score + 1 };
+          }
+          return story;
+        });
+        break;
+    }
+
+    // Broadcast updated data to all clients
+    broadcast({
+      type: 'UPDATE',
+      data: { stories, pendingStories }
+    });
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+});
+
+const PORT = process.env.PORT || 3001;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

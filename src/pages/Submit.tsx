@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStories } from '../context/StoryContext';
 import type { StoryCategory } from '../types';
+import { CheckCircle2 } from 'lucide-react';
 
 const CATEGORIES: StoryCategory[] = ['HUMANS', 'CONTENT', 'PROJECTS', 'CHALLENGES&GRANTS', 'PARTIES&EVENTS'];
 
@@ -11,6 +12,7 @@ export function Submit() {
   const [category, setCategory] = useState<StoryCategory>('CONTENT');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const navigate = useNavigate();
   const { addStory } = useStories();
 
@@ -25,9 +27,13 @@ export function Submit() {
         url: url.trim() || undefined,
         category
       });
-      navigate('/');
+      setIsSubmitted(true);
+      setTimeout(() => {
+        navigate('/');
+      }, 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit story');
+      setIsSubmitted(false);
     } finally {
       setIsLoading(false);
     }
@@ -48,8 +54,31 @@ export function Submit() {
     !url.trim() || 
     !isValidUrl(url);
 
+  if (isSubmitted) {
+    return (
+      <div className="max-w-2xl mx-auto mt-16 px-4 text-center">
+        <div className="bg-zinc-900 rounded-lg p-8">
+          <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <h2 className="text-xl font-silkscreen mb-4">SUBMISSION RECEIVED</h2>
+          <p className="text-zinc-400 mb-6">
+            Your submission is pending admin approval. Once approved, it will appear on the site.
+          </p>
+          <p className="text-zinc-500 text-sm">
+            Redirecting to homepage...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <main className="max-w-2xl mx-auto mt-8 px-4">
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 mb-6">
+        <p className="text-zinc-400 text-sm font-silkscreen">
+          NOTE: ALL SUBMISSIONS REQUIRE ADMIN REVIEW BEFORE APPEARING ON THE SITE
+        </p>
+      </div>
+
       {error && (
         <div className="mb-4 p-3 bg-red-900/50 text-red-200 rounded-md text-sm border border-red-800">
           {error}

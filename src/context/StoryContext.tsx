@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import type { Story, StoryCategory } from '../types';
-import { storage } from '../utils/storage';
 
 interface StoryContextType {
   stories: Story[];
@@ -16,34 +15,74 @@ interface StoryContextType {
 
 const StoryContext = createContext<StoryContextType | undefined>(undefined);
 
-const INITIAL_STORIES: Story[] = [
-  {
-    id: '1',
-    title: 'Welcome to Our News Platform',
-    url: 'https://example.com',
-    score: 42,
-    time: Date.now() / 1000,
-    category: 'CONTENT',
-    approved: true,
-    isSiliconValley: false
+// WebSocket connection
+const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const wsUrl = process.env.NODE_ENV === 'production' 
+  ? `${wsProtocol}//${window.location.host}`
+  : `${wsProtocol}//${window.location.hostname}:3001`;
+
+let ws: WebSocket | null = null;
+
+function connectWebSocket(
+  onMessage: (data: any) => void,
+  onReconnect: () => void
+) {
+  if (ws) return;
+
+  ws = new WebSocket(wsUrl);
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    onMessage(data);
+  };
+
+  ws.onclose = () => {
+    ws = null;
+    // Attempt to reconnect after 3 seconds
+    setTimeout(() => {
+      connectWebSocket(onMessage, onReconnect);
+      onReconnect();
+    }, 3000);
+  };
+
+  ws.onerror = (error) => {
+    console.error('WebSocket error:', error);
+    ws?.close();
+  };
+}
+
+function sendMessage(data: any) {
+  if (ws?.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(data));
   }
-];
+}
 
 export function StoryProvider({ children }: { children: ReactNode }) {
-  const [stories, setStories] = useState<Story[]>(() => {
-    const stored = storage.get('stories');
-    return stored || INITIAL_STORIES;
-  });
-
-  const [pendingStories, setPendingStories] = useState<Story[]>(() => {
-    const stored = storage.get('pendingStories');
-    return stored || [];
-  });
+  const [stories, setStories] = useState<Story[]>([]);
+  const [pendingStories, setPendingStories] = useState<Story[]>([]);
 
   useEffect(() => {
-    storage.set('stories', stories);
-    storage.set('pendingStories', pendingStories);
-  }, [stories, pendingStories]);
+    const handleMessage = (data: any) => {
+      if (data.type === 'INIT' || data.type === 'UPDATE') {
+        setStories(data.data.stories);
+        setPendingStories(data.data.pendingStories);
+      }
+    };
+
+    const handleReconnect = () => {
+      // Request fresh data on reconnection
+      sendMessage({ type: 'REQUEST_DATA' });
+    };
+
+    connectWebSocket(handleMessage, handleReconnect);
+
+    return () => {
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
+    };
+  }, []);
 
   const addStory = (newStory: Omit<Story, 'id' | 'time' | 'score' | 'approved' | 'isSiliconValley'>) => {
     const story: Story = {
@@ -54,39 +93,40 @@ export function StoryProvider({ children }: { children: ReactNode }) {
       approved: false,
       isSiliconValley: false
     };
-    setPendingStories(prev => [story, ...prev]);
+    
+    sendMessage({
+      type: 'ADD_STORY',
+      story
+    });
   };
 
   const removeStory = (id: string) => {
-    setStories(prev => prev.filter(story => story.id !== id));
-    setPendingStories(prev => prev.filter(story => story.id !== id));
+    sendMessage({
+      type: 'REMOVE_STORY',
+      id
+    });
   };
 
   const approveStory = (id: string, isSiliconValley: boolean) => {
-    const story = pendingStories.find(s => s.id === id);
-    if (story) {
-      const approvedStory = { ...story, approved: true, isSiliconValley };
-      setStories(prev => [approvedStory, ...prev]);
-      setPendingStories(prev => prev.filter(s => s.id !== id));
-    }
+    sendMessage({
+      type: 'APPROVE_STORY',
+      id,
+      isSiliconValley
+    });
   };
 
   const rejectStory = (id: string) => {
-    setPendingStories(prev => prev.filter(s => s.id !== id));
+    sendMessage({
+      type: 'REJECT_STORY',
+      id
+    });
   };
 
   const upvoteStory = (id: string) => {
-    setStories(prev =>
-      prev.map(story => {
-        if (story.id === id) {
-          return {
-            ...story,
-            score: story.score + 1
-          };
-        }
-        return story;
-      })
-    );
+    sendMessage({
+      type: 'UPVOTE_STORY',
+      id
+    });
   };
 
   const filterStoriesByCategory = (category: StoryCategory, siliconValleyOnly: boolean) => {

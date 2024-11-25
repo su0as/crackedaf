@@ -6,7 +6,15 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  server: {
+    proxy: {
+      '/ws': {
+        target: 'ws://localhost:3001',
+        ws: true,
+      }
+    }
+  },
   build: {
-    assetsInlineLimit: 0, // Ensure all assets are processed by the asset pipeline
+    assetsInlineLimit: 0,
   },
 });
