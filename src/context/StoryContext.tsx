@@ -11,7 +11,7 @@ interface StoryContextType {
   approveStory: (id: string, isSiliconValley: boolean) => void;
   rejectStory: (id: string) => void;
   upvoteStory: (id: string) => void;
-  filterStoriesByCategory: (category: StoryCategory, siliconValleyOnly: boolean) => Story[];
+  filterStoriesByCategory: (category: StoryCategory, siliconValleyOnly: boolean, sortByTime?: boolean) => Story[];
   getLatestStories: (siliconValleyOnly: boolean) => Story[];
 }
 
@@ -21,7 +21,6 @@ export function StoryProvider({ children }: { children: ReactNode }) {
   const [stories, setStories] = useState<Story[]>([]);
   const [pendingStories, setPendingStories] = useState<Story[]>([]);
 
-  // Subscribe to stories in realtime
   useEffect(() => {
     const storiesRef = ref(db, 'stories');
     const pendingRef = ref(db, 'pendingStories');
@@ -89,16 +88,19 @@ export function StoryProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const filterStoriesByCategory = (category: StoryCategory, siliconValleyOnly: boolean) => {
+  const filterStoriesByCategory = (category: StoryCategory, siliconValleyOnly: boolean, sortByTime = false) => {
     const approvedStories = stories.filter(story => 
       story.approved && 
       (!siliconValleyOnly || story.isSiliconValley)
     );
     
-    if (category === 'ALL') return [...approvedStories].sort((a, b) => b.score - a.score);
-    return [...approvedStories]
-      .filter(story => story.category === category)
-      .sort((a, b) => b.score - a.score);
+    const filteredStories = category === 'ALL' 
+      ? approvedStories 
+      : approvedStories.filter(story => story.category === category);
+
+    return sortByTime 
+      ? [...filteredStories].sort((a, b) => b.time - a.time)
+      : [...filteredStories].sort((a, b) => b.score - a.score);
   };
 
   const getLatestStories = (siliconValleyOnly: boolean) => {

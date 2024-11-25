@@ -17,8 +17,8 @@ export function TopStories({ siliconValleyOnly, view }: TopStoriesProps) {
   const storiesPerPage = 30;
   
   const stories = view === 'new'
-    ? getLatestStories(siliconValleyOnly)
-    : filterStoriesByCategory(selectedCategory, siliconValleyOnly);
+    ? filterStoriesByCategory(selectedCategory, siliconValleyOnly, true)
+    : filterStoriesByCategory(selectedCategory, siliconValleyOnly, false);
     
   const paginatedStories = stories.slice((page - 1) * storiesPerPage, page * storiesPerPage);
   const hasMore = stories.length > page * storiesPerPage;
