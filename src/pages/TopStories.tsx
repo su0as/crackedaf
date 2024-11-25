@@ -1,27 +1,24 @@
 import { useState } from 'react';
 import { StoryItem } from '../components/StoryItem';
 import { useStories } from '../context/StoryContext';
-import { useLocation } from 'react-router-dom';
 import type { StoryCategory } from '../types';
 
-// Reorder categories to keep PARTIES&EVENTS next to CHALLENGES&GRANTS
 const CATEGORIES: StoryCategory[] = ['ALL', 'HUMANS', 'CONTENT', 'PROJECTS', 'CHALLENGES&GRANTS', 'PARTIES&EVENTS'];
 
 interface TopStoriesProps {
   siliconValleyOnly: boolean;
+  view: 'top' | 'new';
 }
 
-export function TopStories({ siliconValleyOnly }: TopStoriesProps) {
+export function TopStories({ siliconValleyOnly, view }: TopStoriesProps) {
   const { filterStoriesByCategory, getLatestStories } = useStories();
   const [selectedCategory, setSelectedCategory] = useState<StoryCategory>('ALL');
   const [page, setPage] = useState(1);
-  const location = useLocation();
   const storiesPerPage = 30;
   
-  const isNewPage = location.pathname === '/new';
-  const stories = isNewPage 
-    ? getLatestStories(false)
-    : filterStoriesByCategory(selectedCategory, false);
+  const stories = view === 'new'
+    ? getLatestStories(siliconValleyOnly)
+    : filterStoriesByCategory(selectedCategory, siliconValleyOnly);
     
   const paginatedStories = stories.slice((page - 1) * storiesPerPage, page * storiesPerPage);
   const hasMore = stories.length > page * storiesPerPage;

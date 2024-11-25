@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
 import { AdminProvider } from './context/AdminContext';
 import { StoryProvider } from './context/StoryContext';
@@ -24,8 +24,9 @@ export function App() {
               setSiliconValleyOnly={setSiliconValleyOnly} 
             />
             <Routes>
-              <Route path="/" element={<TopStories siliconValleyOnly={siliconValleyOnly} />} />
-              <Route path="/new" element={<TopStories siliconValleyOnly={siliconValleyOnly} />} />
+              <Route path="/" element={<Navigate to="/new" replace />} />
+              <Route path="/top" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="top" />} />
+              <Route path="/new" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="new" />} />
               <Route path="/submit" element={<Submit />} />
               <Route path="/item/:id" element={<StoryDetails />} />
               <Route path="/admin/login" element={<AdminLogin />} />
