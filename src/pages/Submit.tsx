@@ -75,7 +75,7 @@ export function Submit() {
     <main className="max-w-2xl mx-auto mt-8 px-4">
       <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 mb-6">
         <p className="text-zinc-400 text-sm font-silkscreen">
-          NOTE: ALL SUBMISSIONS REQUIRE ADMIN REVIEW BEFORE APPEARING ON THE SITE
+          NOTE: ALL SUBMISSIONS ARE REVIEWED BY ADMIN BEFORE APPEARING ON THE SITE
         </p>
       </div>
 
