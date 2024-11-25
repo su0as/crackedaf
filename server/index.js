@@ -1,106 +1,54 @@
 import express from 'express';
-import { WebSocketServer } from 'ws';
-import http from 'http';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import helmet from 'helmet';
 import cors from 'cors';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import db from './db/index.js';
+import cookieParser from 'cookie-parser';
+import rateLimit from 'express-rate-limit';
+import { errorHandler } from './middleware/errorHandler.js';
+import authRoutes from './routes/auth.js';
+import storyRoutes from './routes/stories.js';
+import userRoutes from './routes/users.js';
+import { logger } from './utils/logger.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+dotenv.config();
 
 const app = express();
-const server = http.createServer(app);
-const wss = new WebSocketServer({ 
-  server,
-  path: '/ws'
-});
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// Security middleware
+app.use(helmet());
+app.use(cors({
+  origin: process.env.CLIENT_URL,
+  credentials: true
+}));
+app.use(cookieParser());
 app.use(express.json());
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  const distPath = join(__dirname, '..', 'dist');
-  app.use(express.static(distPath));
-  
-  // Handle SPA routing
-  app.get('*', (req, res) => {
-    res.sendFile(join(distPath, 'index.html'));
-  });
-}
-
-// Broadcast to all clients
-function broadcast(data) {
-  wss.clients.forEach(client => {
-    if (client.readyState === 1) {
-      client.send(JSON.stringify(data));
-    }
-  });
-}
-
-// Listen for database changes
-db.on('change', () => {
-  broadcast({
-    type: 'UPDATE',
-    data: db.getState()
-  });
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
 });
+app.use(limiter);
 
-// WebSocket connection handling
-wss.on('connection', (ws) => {
-  console.log('Client connected');
-  
-  // Send initial data to new client
-  ws.send(JSON.stringify({
-    type: 'INIT',
-    data: db.getState()
-  }));
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/stories', storyRoutes);
+app.use('/api/users', userRoutes);
 
-  ws.on('message', async (message) => {
-    try {
-      const data = JSON.parse(message.toString());
-      console.log('Received:', data.type);
+// Error handling
+app.use(errorHandler);
 
-      switch (data.type) {
-        case 'REQUEST_DATA':
-          ws.send(JSON.stringify({
-            type: 'INIT',
-            data: db.getState()
-          }));
-          break;
-
-        case 'ADD_STORY':
-          await db.addPendingStory(data.story);
-          break;
-
-        case 'APPROVE_STORY':
-          await db.approveStory(data.id, data.isSiliconValley);
-          break;
-
-        case 'REJECT_STORY':
-          await db.rejectStory(data.id);
-          break;
-
-        case 'REMOVE_STORY':
-          await db.removeStory(data.id);
-          break;
-
-        case 'UPVOTE_STORY':
-          await db.upvoteStory(data.id, data.userId);
-          break;
-      }
-    } catch (error) {
-      console.error('Error processing message:', error);
-    }
+// Database connection
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
+    logger.info('Connected to MongoDB');
+    app.listen(PORT, () => {
+      logger.info(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    logger.error('MongoDB connection error:', error);
+    process.exit(1);
   });
-
-  ws.on('close', () => {
-    console.log('Client disconnected');
-  });
-});
-
-const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
