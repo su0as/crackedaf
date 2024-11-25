@@ -10,7 +10,10 @@ const __dirname = dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ 
+  server,
+  path: '/ws'
+});
 
 app.use(cors());
 app.use(express.json());
@@ -50,43 +53,58 @@ wss.on('connection', (ws) => {
   }));
 
   ws.on('message', (message) => {
-    const data = JSON.parse(message);
-    console.log('Received:', data.type);
+    try {
+      const data = JSON.parse(message.toString());
+      console.log('Received:', data.type);
 
-    switch (data.type) {
-      case 'ADD_STORY':
-        pendingStories = [data.story, ...pendingStories];
-        break;
-      case 'APPROVE_STORY':
-        const story = pendingStories.find(s => s.id === data.id);
-        if (story) {
-          const approvedStory = { ...story, approved: true, isSiliconValley: data.isSiliconValley };
-          stories = [approvedStory, ...stories];
-          pendingStories = pendingStories.filter(s => s.id !== data.id);
-        }
-        break;
-      case 'REJECT_STORY':
-        pendingStories = pendingStories.filter(s => s.id !== data.id);
-        break;
-      case 'REMOVE_STORY':
-        stories = stories.filter(s => s.id !== data.id);
-        pendingStories = pendingStories.filter(s => s.id !== data.id);
-        break;
-      case 'UPVOTE_STORY':
-        stories = stories.map(story => {
-          if (story.id === data.id) {
-            return { ...story, score: story.score + 1 };
+      switch (data.type) {
+        case 'REQUEST_DATA':
+          ws.send(JSON.stringify({
+            type: 'INIT',
+            data: { stories, pendingStories }
+          }));
+          break;
+
+        case 'ADD_STORY':
+          pendingStories = [data.story, ...pendingStories];
+          break;
+
+        case 'APPROVE_STORY':
+          const story = pendingStories.find(s => s.id === data.id);
+          if (story) {
+            const approvedStory = { ...story, approved: true, isSiliconValley: data.isSiliconValley };
+            stories = [approvedStory, ...stories];
+            pendingStories = pendingStories.filter(s => s.id !== data.id);
           }
-          return story;
-        });
-        break;
-    }
+          break;
 
-    // Broadcast updated data to all clients
-    broadcast({
-      type: 'UPDATE',
-      data: { stories, pendingStories }
-    });
+        case 'REJECT_STORY':
+          pendingStories = pendingStories.filter(s => s.id !== data.id);
+          break;
+
+        case 'REMOVE_STORY':
+          stories = stories.filter(s => s.id !== data.id);
+          pendingStories = pendingStories.filter(s => s.id !== data.id);
+          break;
+
+        case 'UPVOTE_STORY':
+          stories = stories.map(story => {
+            if (story.id === data.id) {
+              return { ...story, score: story.score + 1 };
+            }
+            return story;
+          });
+          break;
+      }
+
+      // Broadcast updated data to all clients
+      broadcast({
+        type: 'UPDATE',
+        data: { stories, pendingStories }
+      });
+    } catch (error) {
+      console.error('Error processing message:', error);
+    }
   });
 
   ws.on('close', () => {

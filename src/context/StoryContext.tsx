@@ -17,9 +17,7 @@ const StoryContext = createContext<StoryContextType | undefined>(undefined);
 
 // WebSocket connection
 const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-const wsUrl = process.env.NODE_ENV === 'production' 
-  ? `${wsProtocol}//${window.location.host}`
-  : `${wsProtocol}//${window.location.hostname}:3001`;
+const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
 
 let ws: WebSocket | null = null;
 
@@ -31,12 +29,19 @@ function connectWebSocket(
 
   ws = new WebSocket(wsUrl);
 
+  ws.onopen = () => {
+    console.log('WebSocket connected');
+    // Request initial data
+    sendMessage({ type: 'REQUEST_DATA' });
+  };
+
   ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
     onMessage(data);
   };
 
   ws.onclose = () => {
+    console.log('WebSocket disconnected');
     ws = null;
     // Attempt to reconnect after 3 seconds
     setTimeout(() => {
@@ -54,6 +59,8 @@ function connectWebSocket(
 function sendMessage(data: any) {
   if (ws?.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify(data));
+  } else {
+    console.warn('WebSocket not connected, message not sent:', data);
   }
 }
 
@@ -63,6 +70,7 @@ export function StoryProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const handleMessage = (data: any) => {
+      console.log('Received message:', data);
       if (data.type === 'INIT' || data.type === 'UPDATE') {
         setStories(data.data.stories);
         setPendingStories(data.data.pendingStories);
@@ -70,7 +78,6 @@ export function StoryProvider({ children }: { children: ReactNode }) {
     };
 
     const handleReconnect = () => {
-      // Request fresh data on reconnection
       sendMessage({ type: 'REQUEST_DATA' });
     };
 
@@ -85,7 +92,7 @@ export function StoryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addStory = (newStory: Omit<Story, 'id' | 'time' | 'score' | 'approved' | 'isSiliconValley'>) => {
-    const story: Story = {
+    const story = {
       ...newStory,
       id: Math.random().toString(36).substr(2, 9),
       time: Date.now() / 1000,
