@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
+import { AuthProvider } from './context/AuthContext';
 import { AdminProvider } from './context/AdminContext';
 import { StoryProvider } from './context/StoryContext';
 import { Header } from './components/Header';
@@ -14,26 +15,28 @@ export function App() {
   const [siliconValleyOnly, setSiliconValleyOnly] = useState(false);
 
   return (
-    <AdminProvider>
-      <StoryProvider>
-        <Router>
-          <div className="min-h-screen bg-black pb-40">
-            <Header 
-              siliconValleyOnly={siliconValleyOnly} 
-              setSiliconValleyOnly={setSiliconValleyOnly} 
-            />
-            <Routes>
-              <Route path="/" element={<TopStories siliconValleyOnly={siliconValleyOnly} />} />
-              <Route path="/new" element={<TopStories siliconValleyOnly={siliconValleyOnly} />} />
-              <Route path="/submit" element={<Submit />} />
-              <Route path="/item/:id" element={<StoryDetails />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-            </Routes>
-            <ImageCarousel />
-          </div>
-        </Router>
-      </StoryProvider>
-    </AdminProvider>
+    <AuthProvider>
+      <AdminProvider>
+        <StoryProvider>
+          <Router>
+            <div className="min-h-screen bg-black pb-40">
+              <Header 
+                siliconValleyOnly={siliconValleyOnly} 
+                setSiliconValleyOnly={setSiliconValleyOnly} 
+              />
+              <Routes>
+                <Route path="/" element={<TopStories siliconValleyOnly={siliconValleyOnly} />} />
+                <Route path="/new" element={<TopStories siliconValleyOnly={siliconValleyOnly} />} />
+                <Route path="/submit" element={<Submit />} />
+                <Route path="/item/:id" element={<StoryDetails />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+              </Routes>
+              <ImageCarousel />
+            </div>
+          </Router>
+        </StoryProvider>
+      </AdminProvider>
+    </AuthProvider>
   );
 }

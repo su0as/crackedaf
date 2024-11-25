@@ -4,6 +4,7 @@ import http from 'http';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import db from './db/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,10 +30,6 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// In-memory store
-let stories = [];
-let pendingStories = [];
-
 // Broadcast to all clients
 function broadcast(data) {
   wss.clients.forEach(client => {
@@ -42,6 +39,14 @@ function broadcast(data) {
   });
 }
 
+// Listen for database changes
+db.on('change', () => {
+  broadcast({
+    type: 'UPDATE',
+    data: db.getState()
+  });
+});
+
 // WebSocket connection handling
 wss.on('connection', (ws) => {
   console.log('Client connected');
@@ -49,10 +54,10 @@ wss.on('connection', (ws) => {
   // Send initial data to new client
   ws.send(JSON.stringify({
     type: 'INIT',
-    data: { stories, pendingStories }
+    data: db.getState()
   }));
 
-  ws.on('message', (message) => {
+  ws.on('message', async (message) => {
     try {
       const data = JSON.parse(message.toString());
       console.log('Received:', data.type);
@@ -61,47 +66,30 @@ wss.on('connection', (ws) => {
         case 'REQUEST_DATA':
           ws.send(JSON.stringify({
             type: 'INIT',
-            data: { stories, pendingStories }
+            data: db.getState()
           }));
           break;
 
         case 'ADD_STORY':
-          pendingStories = [data.story, ...pendingStories];
+          await db.addPendingStory(data.story);
           break;
 
         case 'APPROVE_STORY':
-          const story = pendingStories.find(s => s.id === data.id);
-          if (story) {
-            const approvedStory = { ...story, approved: true, isSiliconValley: data.isSiliconValley };
-            stories = [approvedStory, ...stories];
-            pendingStories = pendingStories.filter(s => s.id !== data.id);
-          }
+          await db.approveStory(data.id, data.isSiliconValley);
           break;
 
         case 'REJECT_STORY':
-          pendingStories = pendingStories.filter(s => s.id !== data.id);
+          await db.rejectStory(data.id);
           break;
 
         case 'REMOVE_STORY':
-          stories = stories.filter(s => s.id !== data.id);
-          pendingStories = pendingStories.filter(s => s.id !== data.id);
+          await db.removeStory(data.id);
           break;
 
         case 'UPVOTE_STORY':
-          stories = stories.map(story => {
-            if (story.id === data.id) {
-              return { ...story, score: story.score + 1 };
-            }
-            return story;
-          });
+          await db.upvoteStory(data.id, data.userId);
           break;
       }
-
-      // Broadcast updated data to all clients
-      broadcast({
-        type: 'UPDATE',
-        data: { stories, pendingStories }
-      });
     } catch (error) {
       console.error('Error processing message:', error);
     }

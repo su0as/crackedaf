@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from './AuthContext';
 import type { Story, StoryCategory } from '../types';
 
 interface StoryContextType {
@@ -20,6 +21,9 @@ const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
 
 let ws: WebSocket | null = null;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAY = 3000;
 
 function connectWebSocket(
   onMessage: (data: any) => void,
@@ -31,23 +35,32 @@ function connectWebSocket(
 
   ws.onopen = () => {
     console.log('WebSocket connected');
-    // Request initial data
+    reconnectAttempts = 0;
     sendMessage({ type: 'REQUEST_DATA' });
   };
 
   ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    onMessage(data);
+    try {
+      const data = JSON.parse(event.data);
+      onMessage(data);
+    } catch (error) {
+      console.error('Error parsing WebSocket message:', error);
+    }
   };
 
   ws.onclose = () => {
     console.log('WebSocket disconnected');
     ws = null;
-    // Attempt to reconnect after 3 seconds
-    setTimeout(() => {
-      connectWebSocket(onMessage, onReconnect);
-      onReconnect();
-    }, 3000);
+
+    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+      reconnectAttempts++;
+      setTimeout(() => {
+        connectWebSocket(onMessage, onReconnect);
+        onReconnect();
+      }, RECONNECT_DELAY);
+    } else {
+      console.error('Max reconnection attempts reached');
+    }
   };
 
   ws.onerror = (error) => {
@@ -67,10 +80,10 @@ function sendMessage(data: any) {
 export function StoryProvider({ children }: { children: ReactNode }) {
   const [stories, setStories] = useState<Story[]>([]);
   const [pendingStories, setPendingStories] = useState<Story[]>([]);
+  const { user, getAnonymousId } = useAuth();
 
   useEffect(() => {
     const handleMessage = (data: any) => {
-      console.log('Received message:', data);
       if (data.type === 'INIT' || data.type === 'UPDATE') {
         setStories(data.data.stories);
         setPendingStories(data.data.pendingStories);
@@ -92,18 +105,9 @@ export function StoryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addStory = (newStory: Omit<Story, 'id' | 'time' | 'score' | 'approved' | 'isSiliconValley'>) => {
-    const story = {
-      ...newStory,
-      id: Math.random().toString(36).substr(2, 9),
-      time: Date.now() / 1000,
-      score: 1,
-      approved: false,
-      isSiliconValley: false
-    };
-    
     sendMessage({
       type: 'ADD_STORY',
-      story
+      story: newStory
     });
   };
 
@@ -130,9 +134,11 @@ export function StoryProvider({ children }: { children: ReactNode }) {
   };
 
   const upvoteStory = (id: string) => {
+    const userId = user?.id || getAnonymousId();
     sendMessage({
       type: 'UPVOTE_STORY',
-      id
+      id,
+      userId
     });
   };
 
