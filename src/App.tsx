@@ -18,21 +18,23 @@ export function App() {
     <AdminProvider>
       <StoryProvider>
         <Router>
-          <div className="min-h-screen bg-black pb-40">
+          <div className="min-h-screen bg-black">
             <Header 
               siliconValleyOnly={siliconValleyOnly} 
               setSiliconValleyOnly={setSiliconValleyOnly} 
             />
-            <Routes>
-              <Route path="/" element={<Navigate to="/new" replace />} />
-              <Route path="/top" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="top" />} />
-              <Route path="/new" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="new" />} />
-              <Route path="/submit" element={<Submit />} />
-              <Route path="/item/:id" element={<StoryDetails />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/test" element={<TestFirebase />} />
-            </Routes>
+            <div className="pt-16 pb-40">
+              <Routes>
+                <Route path="/" element={<Navigate to="/new" replace />} />
+                <Route path="/top" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="top" />} />
+                <Route path="/new" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="new" />} />
+                <Route path="/submit" element={<Submit />} />
+                <Route path="/item/:id" element={<StoryDetails />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/test" element={<TestFirebase />} />
+              </Routes>
+            </div>
             <ImageCarousel />
           </div>
         </Router>

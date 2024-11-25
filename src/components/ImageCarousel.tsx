@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Import all images
 import el from '/crackedimg/El.jpeg';
@@ -39,6 +39,8 @@ const images = [
 
 export function ImageCarousel() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -53,12 +55,25 @@ export function ImageCarousel() {
       }
     };
 
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setIsVisible(currentScrollY <= lastScrollY.current || currentScrollY < 100);
+      lastScrollY.current = currentScrollY;
+    };
+
     const intervalId = setInterval(scroll, 30);
-    return () => clearInterval(intervalId);
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-zinc-800">
+    <div className={`fixed bottom-0 left-0 right-0 bg-black border-t border-zinc-800 transition-transform duration-300 ${
+      isVisible ? 'translate-y-0' : 'translate-y-full'
+    }`}>
       <div className="relative w-screen overflow-hidden">
         <div
           ref={containerRef}
