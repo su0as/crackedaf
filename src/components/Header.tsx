@@ -28,6 +28,12 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-6">
             <div className="flex items-center space-x-4 text-sm font-normal font-silkscreen">
+              <Link 
+                to="/breakout"
+                className="text-zinc-400 hover:text-white transition-colors"
+              >
+                BREAKOUT
+              </Link>
               <button
                 onClick={() => setSiliconValleyOnly(!siliconValleyOnly)}
                 className={`transition-colors ${
@@ -103,6 +109,13 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden mt-4 space-y-3 pb-3 font-silkscreen">
+            <Link
+              to="/breakout"
+              onClick={() => setIsMenuOpen(false)}
+              className="block w-full text-left px-2 py-1 text-zinc-400 hover:text-white"
+            >
+              BREAKOUT
+            </Link>
             <button
               onClick={() => {
                 setSiliconValleyOnly(!siliconValleyOnly);
