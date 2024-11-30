@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAdmin } from '../context/AdminContext';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Rocket } from 'lucide-react';
 import { useState } from 'react';
 import crackedafLogo from '/crackedaf.png';
 
@@ -30,9 +30,10 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
             <div className="flex items-center space-x-4 text-sm font-normal font-silkscreen">
               <Link 
                 to="/breakout"
-                className="text-zinc-400 hover:text-white transition-colors"
+                className="text-amber-400 hover:text-amber-300 transition-colors flex items-center space-x-1"
               >
-                BREAKOUT
+                <span>BREAKOUT</span>
+                  <Rocket className="w-4 h-4" />
               </Link>
               <button
                 onClick={() => setSiliconValleyOnly(!siliconValleyOnly)}
@@ -112,9 +113,10 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
             <Link
               to="/breakout"
               onClick={() => setIsMenuOpen(false)}
-              className="block w-full text-left px-2 py-1 text-zinc-400 hover:text-white"
+              className="block w-full text-left px-2 py-1 text-amber-400 hover:text-amber-300 flex items-center space-x-1"
             >
-              BREAKOUT
+              <Rocket className="w-4 h-4" />
+              <span>BREAKOUT</span>
             </Link>
             <button
               onClick={() => {

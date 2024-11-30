@@ -8,6 +8,7 @@ import { Submit } from './pages/Submit';
 import { StoryDetails } from './pages/StoryDetails';
 import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { Breakout } from './pages/Breakout';
 import { ImageCarousel } from './components/ImageCarousel';
 import { TestFirebase } from './components/TestFirebase';
 
@@ -29,6 +30,7 @@ export function App() {
                 <Route path="/top" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="top" />} />
                 <Route path="/new" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="new" />} />
                 <Route path="/submit" element={<Submit />} />
+                <Route path="/breakout" element={<Breakout />} />
                 <Route path="/item/:id" element={<StoryDetails />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={<AdminDashboard />} />
