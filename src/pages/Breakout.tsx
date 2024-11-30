@@ -30,7 +30,7 @@ export function Breakout() {
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4 font-silkscreen bg-gradient-to-r from-orange-500 to-pink-500 text-transparent bg-clip-text">
+        <h1 className="text-4xl font-bold mb-4 font-silkscreen bg-gradient-to-r from-amber-400 to-amber-500 text-transparent bg-clip-text">
           BREAKOUT LEADS
         </h1>
         <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
@@ -51,7 +51,7 @@ export function Breakout() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-colors"
+              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 transition-colors"
               required
             />
           </div>
@@ -69,7 +69,7 @@ export function Breakout() {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-2 px-4 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-silkscreen"
+            className="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black py-2 px-4 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-silkscreen"
           >
             {status === 'loading' ? 'JOINING...' : 'JOIN WAITLIST'}
           </button>
@@ -78,19 +78,19 @@ export function Breakout() {
 
       <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="bg-zinc-900 p-6 rounded-lg">
-          <h3 className="text-lg font-silkscreen mb-2 text-orange-500">FUNDED COMPANIES</h3>
+          <h3 className="text-lg font-silkscreen mb-2 text-amber-400">FUNDED COMPANIES</h3>
           <p className="text-zinc-400">
             Get insights into recently funded startups and their growth trajectories.
           </p>
         </div>
         <div className="bg-zinc-900 p-6 rounded-lg">
-          <h3 className="text-lg font-silkscreen mb-2 text-pink-500">BREAKOUT POTENTIAL</h3>
+          <h3 className="text-lg font-silkscreen mb-2 text-amber-400">BREAKOUT POTENTIAL</h3>
           <p className="text-zinc-400">
             Discover companies on the verge of explosive growth and market disruption.
           </p>
         </div>
         <div className="bg-zinc-900 p-6 rounded-lg">
-          <h3 className="text-lg font-silkscreen mb-2 text-purple-500">HIGH IMPACT</h3>
+          <h3 className="text-lg font-silkscreen mb-2 text-amber-400">HIGH IMPACT</h3>
           <p className="text-zinc-400">
             Track companies making significant waves in their industries.
           </p>
