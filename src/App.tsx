@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
 import { AdminProvider } from './context/AdminContext';
 import { StoryProvider } from './context/StoryContext';
@@ -11,35 +11,36 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { Breakout } from './pages/Breakout';
 import { ImageCarousel } from './components/ImageCarousel';
 import { TestFirebase } from './components/TestFirebase';
+import { useLocation } from 'react-router-dom';
 
 export function App() {
   const [siliconValleyOnly, setSiliconValleyOnly] = useState(false);
+  const location = useLocation();
+  const showCarousel = location.pathname !== '/breakout';
 
   return (
     <AdminProvider>
       <StoryProvider>
-        <Router>
-          <div className="min-h-screen bg-black">
-            <Header 
-              siliconValleyOnly={siliconValleyOnly} 
-              setSiliconValleyOnly={setSiliconValleyOnly} 
-            />
-            <div className="pt-16 pb-40">
-              <Routes>
-                <Route path="/" element={<Navigate to="/new" replace />} />
-                <Route path="/top" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="top" />} />
-                <Route path="/new" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="new" />} />
-                <Route path="/submit" element={<Submit />} />
-                <Route path="/breakout" element={<Breakout />} />
-                <Route path="/item/:id" element={<StoryDetails />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/test" element={<TestFirebase />} />
-              </Routes>
-            </div>
-            <ImageCarousel />
+        <div className="min-h-screen bg-black">
+          <Header 
+            siliconValleyOnly={siliconValleyOnly} 
+            setSiliconValleyOnly={setSiliconValleyOnly} 
+          />
+          <div className="pt-16 pb-40">
+            <Routes>
+              <Route path="/" element={<Navigate to="/new" replace />} />
+              <Route path="/top" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="top" />} />
+              <Route path="/new" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="new" />} />
+              <Route path="/submit" element={<Submit />} />
+              <Route path="/breakout" element={<Breakout />} />
+              <Route path="/item/:id" element={<StoryDetails />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/test" element={<TestFirebase />} />
+            </Routes>
           </div>
-        </Router>
+          {showCarousel && <ImageCarousel />}
+        </div>
       </StoryProvider>
     </AdminProvider>
   );

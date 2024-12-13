@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { useStories } from '../context/StoryContext';
 import { useAdmin } from '../context/AdminContext';
 import { storage } from '../utils/storage';
+import { LinkPreview } from './LinkPreview';
 import type { Story } from '../types';
 import { formatDistanceToNow } from 'date-fns';
+import { useState } from 'react';
 
 interface StoryItemProps {
   story: Story;
@@ -19,6 +21,19 @@ export function StoryItem({ story, rank, siliconValleyOnly }: StoryItemProps) {
   const hostname = url ? new URL(url).hostname : null;
   const timeAgo = formatDistanceToNow(new Date(time * 1000), { addSuffix: true });
   const hasUpvoted = storage.hasUpvoted(story.id);
+  const [showPreview, setShowPreview] = useState(false);
+  let previewTimeout: number;
+
+  const handleMouseEnter = () => {
+    previewTimeout = window.setTimeout(() => {
+      setShowPreview(true);
+    }, 500); // Show preview after 500ms hover
+  };
+
+  const handleMouseLeave = () => {
+    window.clearTimeout(previewTimeout);
+    setShowPreview(false);
+  };
 
   const handleUpvote = () => {
     if (!hasUpvoted) {
@@ -54,14 +69,21 @@ export function StoryItem({ story, rank, siliconValleyOnly }: StoryItemProps) {
         <div className="flex items-baseline space-x-2 flex-wrap">
           <h2 className="text-base font-normal font-inter">
             {url ? (
-              <a
-                href={url}
-                className="text-white hover:text-zinc-300 transition-colors"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {title}
-              </a>
+              <div className="relative inline-block">
+                <a
+                  href={url}
+                  className="text-white hover:text-zinc-300 transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  {title}
+                </a>
+                {showPreview && url && (
+                  <LinkPreview url={url} title={title} />
+                )}
+              </div>
             ) : (
               <Link to={`/item/${story.id}`} className="text-white hover:text-zinc-300 transition-colors">
                 {title}
