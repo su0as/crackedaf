@@ -11,12 +11,15 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { Breakout } from './pages/Breakout';
 import { ImageCarousel } from './components/ImageCarousel';
 import { TestFirebase } from './components/TestFirebase';
+import { FeedbackButton } from './components/FeedbackButton';
 import { useLocation } from 'react-router-dom';
 
 export function App() {
   const [siliconValleyOnly, setSiliconValleyOnly] = useState(false);
   const location = useLocation();
   const showCarousel = location.pathname !== '/breakout';
+  const showFeedback = location.pathname !== '/admin' && 
+                      location.pathname !== '/admin/login';
 
   return (
     <AdminProvider>
@@ -40,6 +43,7 @@ export function App() {
             </Routes>
           </div>
           {showCarousel && <ImageCarousel />}
+          {showFeedback && <FeedbackButton />}
         </div>
       </StoryProvider>
     </AdminProvider>
