@@ -2,14 +2,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAdmin } from '../context/AdminContext';
 import { Menu, X, Rocket } from 'lucide-react';
 import { useState } from 'react';
+import { AuthButton } from './auth/AuthButton';
 import crackedafLogo from '/crackedaf.png';
 
-interface HeaderProps {
+export function Header({ siliconValleyOnly, setSiliconValleyOnly }: {
   siliconValleyOnly: boolean;
   setSiliconValleyOnly: (value: boolean) => void;
-}
-
-export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps) {
+}) {
   const location = useLocation();
   const { isAdmin } = useAdmin();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,6 +32,7 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
                 className="text-amber-400 hover:text-amber-300 transition-colors flex items-center space-x-1"
               >
                 <span>BREAKOUT</span>
+                
               </Link>
               <button
                 onClick={() => setSiliconValleyOnly(!siliconValleyOnly)}
@@ -87,6 +87,7 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
               </a>
             </div>
             
+            <AuthButton />
             {isAdmin && (
               <Link
                 to="/admin"
@@ -114,7 +115,7 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
               onClick={() => setIsMenuOpen(false)}
               className="block w-full text-left px-2 py-1 text-amber-400 hover:text-amber-300 flex items-center space-x-1"
             >
-              <Rocket className="w-4 h-4" />
+              
               <span>BREAKOUT</span>
             </Link>
             <button
@@ -164,6 +165,9 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
             >
               X
             </a>
+            <div className="px-2 py-1">
+              <AuthButton />
+            </div>
             {isAdmin && (
               <Link
                 to="/admin"
