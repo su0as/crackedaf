@@ -6,11 +6,11 @@ import type { Story, StoryCategory } from '../types';
 interface StoryContextType {
   stories: Story[];
   pendingStories: Story[];
-  addStory: (story: Omit<Story, 'id' | 'time' | 'score' | 'approved' | 'isSiliconValley'>) => void;
+  addStory: (story: Omit<Story, 'id' | 'time' | 'score' | 'upvotedBy' | 'approved' | 'isSiliconValley'>) => void;
   removeStory: (id: string) => void;
   approveStory: (id: string, isSiliconValley: boolean) => void;
   rejectStory: (id: string) => void;
-  upvoteStory: (id: string) => void;
+  upvoteStory: (id: string, userId: string) => void;
   filterStoriesByCategory: (category: StoryCategory, siliconValleyOnly: boolean, sortByTime?: boolean) => Story[];
   getLatestStories: (siliconValleyOnly: boolean) => Story[];
 }
@@ -29,7 +29,8 @@ export function StoryProvider({ children }: { children: ReactNode }) {
       const data = snapshot.val();
       const storyList = data ? Object.entries(data).map(([id, story]) => ({
         ...(story as any),
-        id
+        id,
+        upvotedBy: (story as any).upvotedBy || []
       })) : [];
       setStories(storyList);
     });
@@ -49,11 +50,12 @@ export function StoryProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const addStory = async (newStory: Omit<Story, 'id' | 'time' | 'score' | 'approved' | 'isSiliconValley'>) => {
+  const addStory = async (newStory: Omit<Story, 'id' | 'time' | 'score' | 'upvotedBy' | 'approved' | 'isSiliconValley'>) => {
     const story = {
       ...newStory,
       time: Date.now() / 1000,
       score: 1,
+      upvotedBy: [],
       approved: false,
       isSiliconValley: false
     };
@@ -69,7 +71,7 @@ export function StoryProvider({ children }: { children: ReactNode }) {
   const approveStory = async (id: string, isSiliconValley: boolean) => {
     const story = pendingStories.find(s => s.id === id);
     if (story) {
-      const approvedStory = { ...story, approved: true, isSiliconValley };
+      const approvedStory = { ...story, approved: true, isSiliconValley, upvotedBy: [] };
       await set(ref(db, `stories/${id}`), approvedStory);
       await remove(ref(db, `pendingStories/${id}`));
     }
@@ -79,11 +81,13 @@ export function StoryProvider({ children }: { children: ReactNode }) {
     await remove(ref(db, `pendingStories/${id}`));
   };
 
-  const upvoteStory = async (id: string) => {
+  const upvoteStory = async (id: string, userId: string) => {
     const story = stories.find(s => s.id === id);
-    if (story) {
+    if (story && !story.upvotedBy.includes(userId)) {
+      const updatedUpvotes = [...story.upvotedBy, userId];
       await update(ref(db, `stories/${id}`), {
-        score: story.score + 1
+        score: story.score + 1,
+        upvotedBy: updatedUpvotes
       });
     }
   };

@@ -10,6 +10,7 @@ export interface Story {
   category: StoryCategory;
   approved: boolean;
   isSiliconValley?: boolean;
+  upvotedBy: string[];
 }
 
 export interface Admin {

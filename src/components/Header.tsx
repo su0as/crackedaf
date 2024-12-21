@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAdmin } from '../context/AdminContext';
 import { Menu, X, Rocket } from 'lucide-react';
 import { useState } from 'react';
+import { AuthButton } from './AuthButton';
 import crackedafLogo from '/crackedaf.png';
 
 interface HeaderProps {
@@ -33,6 +34,7 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
                 className="text-amber-400 hover:text-amber-300 transition-colors flex items-center space-x-1"
               >
                 <span>BREAKOUT</span>
+                <Rocket className="w-4 h-4" />
               </Link>
               <button
                 onClick={() => setSiliconValleyOnly(!siliconValleyOnly)}
@@ -85,6 +87,7 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
                   DOIN SOMETHING CRACKED! SEND A DM
                 </span>
               </a>
+              <AuthButton />
             </div>
             
             {isAdmin && (
@@ -164,6 +167,9 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
             >
               X
             </a>
+            <div className="py-2 px-2">
+              <AuthButton />
+            </div>
             {isAdmin && (
               <Link
                 to="/admin"
