@@ -34,7 +34,6 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
                 className="text-amber-400 hover:text-amber-300 transition-colors flex items-center space-x-1"
               >
                 <span>BREAKOUT</span>
-                <Rocket className="w-4 h-4" />
               </Link>
               <button
                 onClick={() => setSiliconValleyOnly(!siliconValleyOnly)}
@@ -117,7 +116,6 @@ export function Header({ siliconValleyOnly, setSiliconValleyOnly }: HeaderProps)
               onClick={() => setIsMenuOpen(false)}
               className="block w-full text-left px-2 py-1 text-amber-400 hover:text-amber-300 flex items-center space-x-1"
             >
-              <Rocket className="w-4 h-4" />
               <span>BREAKOUT</span>
             </Link>
             <button
