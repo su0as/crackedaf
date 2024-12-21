@@ -15,13 +15,15 @@ interface StoryItemProps {
 }
 
 export function StoryItem({ story, rank, siliconValleyOnly }: StoryItemProps) {
-  const { title, url, score, time, category, isSiliconValley } = story;
+  const { title, url, score, time, category, isSiliconValley, upvotedBy } = story;
   const { upvoteStory, removeStory } = useStories();
   const { isAdmin } = useAdmin();
   const { user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const hostname = url ? new URL(url).hostname : null;
   const timeAgo = formatDistanceToNow(new Date(time * 1000), { addSuffix: true });
+
+  const hasUpvoted = user && upvotedBy?.includes(user.uid);
 
   const handleUpvote = () => {
     if (!user) {
@@ -45,8 +47,13 @@ export function StoryItem({ story, rank, siliconValleyOnly }: StoryItemProps) {
         <span className="text-zinc-500 w-8 text-right font-inter">{rank}.</span>
         <button 
           onClick={handleUpvote}
-          className="text-zinc-500 hover:text-white cursor-pointer transition-colors"
-          title={user ? 'Upvote' : 'Sign in to upvote'}
+          className={`${
+            hasUpvoted 
+              ? 'text-amber-400 cursor-not-allowed' 
+              : 'text-zinc-500 hover:text-white cursor-pointer'
+          } transition-colors`}
+          title={user ? (hasUpvoted ? 'Already upvoted' : 'Upvote') : 'Sign in to upvote'}
+          disabled={hasUpvoted}
         >
           <ArrowUp className="w-4 h-4" />
         </button>
