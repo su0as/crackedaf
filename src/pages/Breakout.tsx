@@ -18,7 +18,7 @@ const features = [
 
 export function Breakout() {
   return (
-    <main className="max-w-4xl mx-auto px-4 py-12">
+    <main className="max-w-4xl mx-auto px-4 py-24">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4 font-silkscreen bg-gradient-to-r from-amber-400 to-amber-500 text-transparent bg-clip-text">
           BREAKOUT AI
