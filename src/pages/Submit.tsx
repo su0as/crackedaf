@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStories } from '../context/StoryContext';
+import { useAuth } from '../providers/AuthProvider';
 import { X } from 'lucide-react';
 import type { StoryCategory } from '../types';
 
@@ -14,20 +15,29 @@ export function Submit() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { addStory } = useStories();
+  const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      setError('You must be logged in to submit a story');
+      return;
+    }
+
     setError('');
     setIsLoading(true);
 
     try {
-      addStory({
+      await addStory({
         title: title.trim(),
-        url: url.trim() || undefined,
-        category
+        url: url.trim(),
+        category,
+        authorId: user.uid,
+        authorName: user.email || 'Anonymous'
       });
       navigate('/new');
     } catch (err) {
+      console.error('Submit error:', err);
       setError(err instanceof Error ? err.message : 'Failed to submit story');
     } finally {
       setIsLoading(false);
@@ -70,17 +80,17 @@ export function Submit() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="category" className="block text-sm font-['Silkscreen'] text-zinc-300">
+          <label htmlFor="category" className="block text-sm font-silkscreen text-zinc-300">
             CATEGORY
           </label>
           <select
             id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value as StoryCategory)}
-            className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white font-['Silkscreen']"
+            className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white font-silkscreen"
           >
             {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat} className="font-['Silkscreen']">
+              <option key={cat} value={cat} className="font-silkscreen">
                 {cat.replace('&', ' & ')}
               </option>
             ))}
@@ -88,7 +98,7 @@ export function Submit() {
         </div>
 
         <div>
-          <label htmlFor="title" className="block text-sm font-['Silkscreen'] text-zinc-300">
+          <label htmlFor="title" className="block text-sm font-silkscreen text-zinc-300">
             TITLE
           </label>
           <input
@@ -106,7 +116,7 @@ export function Submit() {
         </div>
 
         <div>
-          <label htmlFor="url" className="block text-sm font-['Silkscreen'] text-zinc-300">
+          <label htmlFor="url" className="block text-sm font-silkscreen text-zinc-300">
             URL
           </label>
           <input
@@ -126,7 +136,7 @@ export function Submit() {
         <button
           type="submit"
           disabled={isSubmitDisabled}
-          className="w-full bg-white text-black py-2 px-4 rounded-md hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-['Silkscreen']"
+          className="w-full bg-white text-black py-2 px-4 rounded-md hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-silkscreen"
         >
           {isLoading ? 'SUBMITTING...' : 'SUBMIT'}
         </button>

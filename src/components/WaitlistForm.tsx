@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ref, push } from 'firebase/database';
+import { ref, push, get } from 'firebase/database';
 import { db } from '../firebase';
 
 export function WaitlistForm() {
@@ -13,15 +13,32 @@ export function WaitlistForm() {
     setErrorMessage('');
 
     try {
+      // Check if email already exists
       const waitlistRef = ref(db, 'waitlist');
+      const snapshot = await get(waitlistRef);
+      const entries = snapshot.val() || {};
+      
+      const emailExists = Object.values(entries).some(
+        (entry: any) => entry.email === email
+      );
+
+      if (emailExists) {
+        setStatus('error');
+        setErrorMessage('This email is already on the waitlist');
+        return;
+      }
+
+      // Add new entry
       await push(waitlistRef, {
         email,
         timestamp: Date.now(),
+        status: 'pending'
       });
       
       setStatus('success');
       setEmail('');
     } catch (error) {
+      console.error('Waitlist error:', error);
       setStatus('error');
       setErrorMessage('Failed to join waitlist. Please try again.');
     }
