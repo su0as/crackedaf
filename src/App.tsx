@@ -5,6 +5,7 @@ import { StoryProvider } from './context/StoryContext';
 import { AuthProvider } from './providers/AuthProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Header } from './components/Header';
+import { WaitlistBanner } from './components/WaitlistBanner';
 import { TopStories } from './pages/TopStories';
 import { Submit } from './pages/Submit';
 import { StoryDetails } from './pages/StoryDetails';
@@ -23,6 +24,7 @@ export function App() {
   const showCarousel = location.pathname !== '/breakout';
   const showFeedback = location.pathname !== '/admin' && 
                       location.pathname !== '/admin/login';
+  const showWaitlist = location.pathname !== '/breakout';
 
   return (
     <ErrorBoundary>
@@ -34,7 +36,8 @@ export function App() {
                 siliconValleyOnly={siliconValleyOnly} 
                 setSiliconValleyOnly={setSiliconValleyOnly} 
               />
-              <div className="pt-16 pb-40">
+              {showWaitlist && <WaitlistBanner />}
+              <div className="pt-2 pb-40">
                 <Routes>
                   <Route path="/" element={<Navigate to="/new" replace />} />
                   <Route path="/top" element={<TopStories siliconValleyOnly={siliconValleyOnly} view="top" />} />
