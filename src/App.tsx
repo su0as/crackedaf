@@ -12,6 +12,7 @@ import { StoryDetails } from './pages/StoryDetails';
 import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { Breakout } from './pages/Breakout';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { ImageCarousel } from './components/ImageCarousel';
 import { TestFirebase } from './components/TestFirebase';
 import { FeedbackButton } from './components/FeedbackButton';
@@ -61,6 +62,7 @@ export function App() {
                       </RequireAuth>
                     } 
                   />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/test" element={<TestFirebase />} />
                 </Routes>
               </div>
