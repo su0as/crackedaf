@@ -13,6 +13,8 @@ import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { Breakout } from './pages/Breakout';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { Terms } from './pages/Terms';
+import { Refund } from './pages/Refund';
 import { ImageCarousel } from './components/ImageCarousel';
 import { TestFirebase } from './components/TestFirebase';
 import { FeedbackButton } from './components/FeedbackButton';
@@ -63,6 +65,8 @@ export function App() {
                     } 
                   />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/refund" element={<Refund />} />
                   <Route path="/test" element={<TestFirebase />} />
                 </Routes>
               </div>
