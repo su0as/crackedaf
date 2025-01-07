@@ -18,6 +18,7 @@ import { Refund } from './pages/Refund';
 import { ImageCarousel } from './components/ImageCarousel';
 import { TestFirebase } from './components/TestFirebase';
 import { FeedbackButton } from './components/FeedbackButton';
+import { Footer } from './components/Footer';
 import { RequireAuth } from './components/RequireAuth';
 import { useLocation } from 'react-router-dom';
 

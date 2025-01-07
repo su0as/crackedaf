@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { StoryItem } from '../components/StoryItem';
 import { useStories } from '../context/StoryContext';
 import type { StoryCategory } from '../types';
@@ -64,6 +65,17 @@ export function TopStories({ siliconValleyOnly, view }: TopStoriesProps) {
             PREVIOUS
           </button>
         )}
+        <div className="flex items-center space-x-4 text-xs font-silkscreen">
+          <Link to="/privacy-policy" className="text-zinc-400 hover:text-white transition-colors">
+            PRIVACY
+          </Link>
+          <Link to="/terms" className="text-zinc-400 hover:text-white transition-colors">
+            TERMS
+          </Link>
+          <Link to="/refund" className="text-zinc-400 hover:text-white transition-colors">
+            REFUND
+          </Link>
+        </div>
         {hasMore && (
           <button
             onClick={() => setPage(p => p + 1)}
